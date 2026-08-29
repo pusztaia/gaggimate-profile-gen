@@ -52,15 +52,13 @@ const T = {
   purple:   'var(--color-secondary)',
   green:    'var(--analyzer-flow-text)'
 };
-const MONO = { fontFamily: 'ui-monospace, "Cascadia Code", monospace' };
-
 // ─── Shared Profile Engine ───────────────────────────────────────
 const engine = globalThis.GaggiMateProfileEngine;
 if (!engine) throw new Error('GaggiMateProfileEngine failed to load.');
 const {
   ROAST_LABELS, AGE_LABELS, BASE_PROCESSING, FERMENTATIONS, AXES,
   ARCHETYPES,
-  clamp, r1, r2, beanFlavourDefaults, recommendedRatio,
+  clamp, r1, beanFlavourDefaults, recommendedRatio,
   ratioRecommendationReason, rankedArchetypes, recommendedArchetype,
   buildProfile, applyHolisticTransitions
 } = engine;
@@ -343,7 +341,6 @@ export default function AdvancedProfileDesigner() {
   const [beanBp, setBeanBp] = useState(() => beanFlavourDefaults(2, 1, 'Washed', 'None'));
   const [cupBp, setCupBp] = useState(() => beanFlavourDefaults(2, 1, 'Washed', 'None'));
   const previousBeanBpRef = useRef(beanFlavourDefaults(2, 1, 'Washed', 'None'));
-  const [visibleSpiders, setVisibleSpiders] = useState({ bean: true, cup: true, arch: true, final: true });
 
   // Saved Manifest Registries
   const [storedProfiles, setStoredProfiles] = useState(DEFAULT_SAVED_PROFILES);
@@ -401,7 +398,6 @@ export default function AdvancedProfileDesigner() {
   }, [arch, neutralBp]);
 
   const durMult = 1.0;
-  const yv = profile.yv;
   const engineTemp = profile.baseTemp;
 
   // Template: manual edits > imported base > engine phases
@@ -559,8 +555,6 @@ function normalizeProfile(p) {
     }
   }
 
-  const toggleSpider = key => setVisibleSpiders(prev => ({ ...prev, [key]: !prev[key] }));
-
   // Block Array Adjusters
   const updatePhase = (idx, patch) => {
     setEditPhases(prev => {
@@ -589,9 +583,6 @@ function normalizeProfile(p) {
       return [...base, { name: 'Ext Stage', phase: 'brew', duration: 5, temperature: parseFloat(engineTemp.toFixed(1)), pump: { target: 'pressure', pressure: 6.0, flow: 2.2 }, targets: [] }];
     });
   };
-
-  // ─── PROFILE FILES IO SYSTEM DECK ──────────────────────────────
-  const handleLoadStoredProfile = item => importProfile(item);
 
   const generateAiProfile = async () => {
     if (!prompt.trim()) return;
@@ -673,7 +664,6 @@ Output ONLY the JSON array, starting with [`;
       setTimeout(() => setAiMsg(''), 8000);
     }
   };
-const buttonClass = `btn btn-sm flex-1 ${basePhases ? 'bg-base-200 btn-secondary btn-outline' : 'hidden bg-base-300 label'}`
   return (
     <div class="p-4 max-w-7xl mx-auto space-y-6 text-base-content min-h-screen">
       {/* GLOBAL BANNER HEADER */}

@@ -19,12 +19,6 @@ export default [
         globalThis: 'readonly',
       },
     },
-    rules: {
-      // Some flavour-vector locals here are leftover from a prior refactor of the
-      // extraction-curve heuristics (now driven by gap()); real but low-risk dead
-      // code, tracked as cleanup rather than fixed blind in a tooling-only pass.
-      'no-unused-vars': 'warn',
-    },
   },
   {
     files: ['*.jsx'],
@@ -45,10 +39,10 @@ export default [
       'react/jsx-uses-vars': 'error',
       'react-hooks/exhaustive-deps': 'warn',
       'no-empty': ['error', { allowEmptyCatch: true }],
-      // gaggimate-generator.jsx predates this tooling pass and has known dead
-      // locals (e.g. unused destructured state, superseded helpers); tracked as
-      // cleanup rather than fixed blind since this file can't run standalone here.
-      'no-unused-vars': 'warn',
+      // Some state values here (e.g. `rightTab`) still have a live setter but no
+      // reader — tracked as a follow-up rather than removed blind, since this
+      // file can't run standalone here to verify the setter is truly a no-op.
+      'no-unused-vars': ['warn', { caughtErrorsIgnorePattern: '^_' }],
     },
   },
   {

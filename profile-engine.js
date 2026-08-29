@@ -233,17 +233,9 @@ function buildProfile({ rl, ra, baseProcess, fermentation, ratioTarget, arch, be
 
   const clarGap  = gap('Clarity');
   const bodyGap  = gap('Body');
-  const bAcid    = (beanBp.Acidity   ?? 5) / 10;
   const bSyrup   = (beanBp.Body      ?? 5) / 10;
-  const bFloral  = (beanBp.Floral    ?? 5) / 10;
-  const bFruit   = (beanBp.Fruitiness?? 5) / 10;
-  const bRoast   = (beanBp.Roastiness?? 5) / 10;
-  const bChoc    = (beanBp.Chocolate ?? 5) / 10;
-  const bSweet   = (beanBp.Sweetness ?? 5) / 10;
-  const bBitter  = (beanBp.Bitterness?? 5) / 10;
-  const bCrema   = (beanBp.Crema     ?? 5) / 10;
 
-  let internalPhases = []; let jsonPhases = [];
+  let jsonPhases = [];
 
   // ── peakP ────────────────────────────────────────────────────────
   // Base: 9.0 bar at neutral. Darker roast pulls it down.
@@ -346,13 +338,6 @@ function buildProfile({ rl, ra, baseProcess, fermentation, ratioTarget, arch, be
         pump:{target:'pressure',pressure:taperP,flow:r1(mainF*1.1)},
         targets:[{type:'volumetric',operator:'gte',value:r1(yv)}] },
     ];
-    internalPhases = [
-      {name:'Fill',   dur:fillD,  sP:0,     eP:r2(1.5),  fl:fillF,          tmp:r1(T0+0.3)},
-      {name:'Soak',   dur:soakD,  sP:r2(1.5), eP:r2(2.0), fl:r1(fillF*0.2), tmp:r1(T0+0.2)},
-      {name:'Ramp',   dur:rampD,  sP:r2(2.0), eP:holdP,  fl:r1(mainF*0.6), tmp:r1(T0)},
-      {name:'Hold',   dur:holdD,  sP:holdP, eP:r2(holdP-0.2), fl:mainF,    tmp:r1(T0)},
-      {name:'Taper',  dur:taperD, sP:r2(holdP-0.2), eP:taperP, fl:r1(mainF*1.1), tmp:r1(T0-0.4)},
-    ];
 
   } else if (arch === 'Modern Sweet') {
     // Gentle flow prewet → low-pressure soak → smooth S-curve ramp → flow-controlled extraction.
@@ -382,12 +367,6 @@ function buildProfile({ rl, ra, baseProcess, fermentation, ratioTarget, arch, be
         transition:{type:'instant',duration:0,adaptive:true},
         pump:{target:'flow',pressure:r2(sweetP+0.3),flow:sweetF},
         targets:[{type:'volumetric',operator:'gte',value:r1(yv)}] },
-    ];
-    internalPhases = [
-      {name:'Prewet',    dur:prewetD, sP:0,    eP:r2(1.2),  fl:prewetF, tmp:r1(T0+0.5)},
-      {name:'Soak',      dur:soakD2,  sP:r2(1.2), eP:r2(2.2), fl:0.5,  tmp:r1(T0+0.3)},
-      {name:'Ramp',      dur:rampD,   sP:r2(2.2), eP:sweetP, fl:sweetF, tmp:r1(T0)},
-      {name:'Extraction',dur:extrDS,  sP:sweetP, eP:r2(sweetP-0.3), fl:sweetF, tmp:r1(T0)},
     ];
 
   } else if (arch === 'Lever Style') {
@@ -429,14 +408,6 @@ function buildProfile({ rl, ra, baseProcess, fermentation, ratioTarget, arch, be
         pump:{target:'pressure',pressure:declineP,flow:0},
         targets:[{type:'volumetric',operator:'gte',value:r1(yv)}] },
     ];
-    internalPhases = [
-      {name:'Fill Start',   dur:fillD,    sP:0,      eP:fillP, fl:0,   tmp:r1(T0+0.5)},
-      {name:'Pre-infusion', dur:piD,      sP:fillP,  eP:piP,   fl:0.3, tmp:r1(T0+0.3)},
-      {name:'Soak',         dur:soakD2,   sP:piP,    eP:piP,   fl:0.2, tmp:r1(T0+0.2)},
-      {name:'Rise',         dur:riseD,    sP:piP,    eP:riseP, fl:0.5, tmp:r1(T0)},
-      {name:'Hold',         dur:holdD,    sP:riseP,  eP:riseP, fl:1.2, tmp:r1(T0)},
-      {name:'Decline',      dur:declineD, sP:riseP,  eP:declineP, fl:2.5, tmp:r1(T0-0.3)},
-    ];
 
   } else if (arch === 'Nordic Clarity') {
     // Lower pressure, flow-first extraction for transparency and acidity.
@@ -469,12 +440,6 @@ function buildProfile({ rl, ra, baseProcess, fermentation, ratioTarget, arch, be
         pump:{target:'flow',pressure:r2(nordicP+0.5),flow:nordicF},
         targets:[{type:'volumetric',operator:'gte',value:r1(yv)}] },
     ];
-    internalPhases = [
-      {name:'Prewet',          dur:prewetD, sP:0,       eP:r2(1.0),   fl:prewetF, tmp:r1(T0+0.3)},
-      {name:'Compress',        dur:compD,   sP:r2(1.0), eP:compEndP,  fl:0.8,     tmp:r1(T0+0.2)},
-      {name:'Ramp',            dur:rampD,   sP:compEndP,eP:nordicP,   fl:nordicF, tmp:r1(T0)},
-      {name:'Flow Extraction', dur:extrDN,  sP:nordicP, eP:r2(nordicP-0.5), fl:nordicF, tmp:r1(T0)},
-    ];
 
   } else if (arch === 'Turbo Shot') {
     // Minimal preinfusion, immediate high flow, fast high-pressure extraction.
@@ -499,11 +464,6 @@ function buildProfile({ rl, ra, baseProcess, fermentation, ratioTarget, arch, be
         transition:{type:'instant',duration:0,adaptive:true},
         pump:{target:'flow',pressure:turboP,flow:turboF},
         targets:[{type:'volumetric',operator:'gte',value:r1(yv)}] },
-    ];
-    internalPhases = [
-      {name:'Quick Fill',       dur:piD,    sP:0,     eP:r2(2.0), fl:fillF,  tmp:r1(T0+0.2)},
-      {name:'Ramp',             dur:rampD,  sP:r2(2.0), eP:turboP, fl:turboF, tmp:r1(T0)},
-      {name:'Turbo Extraction', dur:turboD, sP:turboP, eP:r2(turboP-0.3), fl:turboF, tmp:r1(T0)},
     ];
 
   } else if (arch === 'Syrupy Body') {
@@ -540,13 +500,6 @@ function buildProfile({ rl, ra, baseProcess, fermentation, ratioTarget, arch, be
         pump:{target:'pressure',pressure:syrupP,flow:syrupF},
         targets:[{type:'volumetric',operator:'gte',value:r1(yv)}] },
     ];
-    internalPhases = [
-      {name:'Fill',            dur:fillD,  sP:0,     eP:r2(2.0), fl:fillF2,         tmp:r1(T0+0.3)},
-      {name:'Compress',        dur:compD,  sP:r2(2.0), eP:compP, fl:r1(syrupF),     tmp:r1(T0+0.2)},
-      {name:'Drip Soak',       dur:dripD,  sP:compP, eP:r2(0.2), fl:r1(0.2),        tmp:r1(T0+0.1)},
-      {name:'Ramp',            dur:rampD,  sP:r2(0.2), eP:syrupP, fl:r1(syrupF*0.6), tmp:r1(T0)},
-      {name:'Body Extraction', dur:extrDS, sP:syrupP, eP:r2(syrupP-0.2), fl:syrupF, tmp:r1(T0)},
-    ];
 
   } else if (arch === 'Cafe Allrounder') {
     // Balanced profile for versatility. Flow fill → compress → moderate ramp →
@@ -582,13 +535,6 @@ function buildProfile({ rl, ra, baseProcess, fermentation, ratioTarget, arch, be
         pump:{target:'pressure',pressure:finP,flow:r1(mainF*1.1)},
         targets:[{type:'volumetric',operator:'gte',value:r1(yv)}] },
     ];
-    internalPhases = [
-      {name:'Fill',      dur:fillD,  sP:0,     eP:r2(1.8), fl:fillF2,        tmp:r1(T0+0.3)},
-      {name:'Compress',  dur:compD,  sP:r2(1.8), eP:compP, fl:r1(mainF*0.3), tmp:r1(T0+0.1)},
-      {name:'Ramp',      dur:rampD,  sP:compP, eP:peakP,  fl:r1(mainF*0.6), tmp:r1(T0)},
-      {name:'Extraction',dur:mainDA, sP:peakP, eP:r2(peakP-0.2), fl:mainF,  tmp:r1(T0)},
-      {name:'Finish',    dur:finDA,  sP:r2(peakP-0.2), eP:finP, fl:r1(mainF*1.1), tmp:r1(T0-0.3)},
-    ];
 
   } else {
     // Adaptive Dynamic: multi-stage adaptive profile.
@@ -601,7 +547,6 @@ function buildProfile({ rl, ra, baseProcess, fermentation, ratioTarget, arch, be
     const highD   = clamp(Math.round(extrD * 0.45), 8, 28);
     const dropD   = clamp(Math.round(extrD * 0.55), 8, 30);
     const compP   = clamp(r2(2.8 + bodyGap * 0.3), 2.0, 4.5);
-    const dipP    = clamp(r2(peakP - 2.5 + clarGap * 0.5), 4.0, 8.0);
     const overshP = clamp(r2(peakP + 1.2), 7.5, 11.5);
 
     jsonPhases = [
@@ -628,14 +573,6 @@ function buildProfile({ rl, ra, baseProcess, fermentation, ratioTarget, arch, be
         transition:{type:'instant',duration:0,adaptive:true},
         pump:{target:'flow',pressure:r2(peakP-0.2),flow:mainF},
         targets:[{type:'water_pumped',operator:'gte',value:100},{type:'volumetric',operator:'gte',value:r1(yv)}] },
-    ];
-    internalPhases = [
-      {name:'Prefill',    dur:fillD,   sP:0,     eP:r2(1.5), fl:r1(7.5),      tmp:r1(T0+0.3)},
-      {name:'Fill',       dur:satD2,   sP:r2(1.5), eP:compP, fl:r1(mainF*0.3), tmp:r1(T0+0.1)},
-      {name:'Compressing',dur:Math.round(satD2*0.5), sP:compP, eP:r2(0.2), fl:0.3, tmp:r1(T0)},
-      {name:'Dripping',   dur:dripD,   sP:r2(0.2), eP:r2(0.1), fl:0.1,      tmp:r1(T0)},
-      {name:'Pressurize', dur:rampD,   sP:r2(0.1), eP:peakP, fl:r1(mainF*0.6), tmp:r1(T0)},
-      {name:'Extraction', dur:highD+dropD, sP:peakP, eP:dipP, fl:mainF,      tmp:r1(T0)},
     ];
   }
 
@@ -699,7 +636,7 @@ function buildCurveFromJsonPhases(jsonPhases) {
   if (!Array.isArray(jsonPhases) || !jsonPhases.length) return [];
 
   const easeFns = {
-    'instant':     x => 1,
+    'instant':     () => 1,
     'linear':      x => x,
     'ease-out':    x => 1 - Math.pow(1 - x, 2),
     'ease-in':     x => x * x,
@@ -768,7 +705,6 @@ function classifyPhaseRole(ph, phases, idx) {
   const p = ph.pump?.pressure ?? 0;
   const f = ph.pump?.flow ?? 0;
   const prevP = idx > 0 ? (phases[idx - 1]?.pump?.pressure ?? p) : p;
-  const nextP = idx < phases.length - 1 ? (phases[idx + 1]?.pump?.pressure ?? p) : p;
 
   if (ph.phase === 'preinfusion') {
     const isFlowFill = ph.pump?.target === 'flow' && f > 2;
@@ -795,9 +731,7 @@ function classifyPhaseRole(ph, phases, idx) {
 function deriveTransitionForPhase(ph, phIdx, allPhases, flavour) {
   const prevRole = classifyPhaseRole(allPhases[phIdx - 1], allPhases, phIdx - 1);
   const currRole = classifyPhaseRole(ph, allPhases, phIdx);
-  const nextRole = classifyPhaseRole(allPhases[phIdx + 1], allPhases, phIdx + 1);
   const isFirst  = phIdx === 0;
-  const isLast   = phIdx === allPhases.length - 1;
 
   // Flavour scores (0–1 range) that shape transition aggressiveness
   const clarity   = (flavour.Clarity    ?? 5) / 10;
@@ -805,13 +739,10 @@ function deriveTransitionForPhase(ph, phIdx, allPhases, flavour) {
   const body      = (flavour.Body       ?? 5) / 10;
   const acidity   = (flavour.Acidity    ?? 5) / 10;
   const floral    = (flavour.Floral     ?? 5) / 10;
-  const roasty    = (flavour.Roastiness ?? 5) / 10;
 
-  // Pressure delta to next phase — large swings need shaped curves
+  // Pressure delta from the previous phase — large swings need shaped curves
   const currP = ph.pump?.pressure ?? 0;
-  const nextP = (allPhases[phIdx + 1]?.pump?.pressure) ?? currP;
   const prevP = (allPhases[phIdx - 1]?.pump?.pressure) ?? currP;
-  const deltaToNext = nextP - currP;
   const deltaFromPrev = currP - prevP;
 
   // --- RULE TABLE ---
