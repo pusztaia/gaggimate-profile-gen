@@ -311,7 +311,6 @@ export default function AdvancedProfileDesigner() {
   
   // Left side Control Panel Tabs
   const [leftTab, setLeftTab] = useState('variables');
-  const [rightTab, setRightTab] = useState('engine');
   const [aiMsg, setAiMsg] = useState('');
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -527,7 +526,6 @@ function normalizeProfile(p) {
     );
     if (matchedArch) setArch(matchedArch.id);
 
-    setRightTab('engine');
     setAiMsg('✓ Loaded — imported phases are now the base template. Parameters still apply on top.');
     setTimeout(() => setAiMsg(''), 5000);
   }
@@ -950,7 +948,7 @@ Output ONLY the JSON array, starting with [`;
             </div>
           <div class="flex w-full gap-2 p-4">
             {basePhases&&
-              <button class="btn btn-sm btn-outline btn-secondary flex-1 bg-base-200" onClick={() => { setBasePhases(null); setBaseTempRef(null); setEditPhases(null); setRightTab('engine'); setProfileMeta({...profileMeta, title : 'Phases'});}}>
+              <button class="btn btn-sm btn-outline btn-secondary flex-1 bg-base-200" onClick={() => { setBasePhases(null); setBaseTempRef(null); setEditPhases(null); setProfileMeta({...profileMeta, title : 'Phases'});}}>
                 Reset from Imported
               </button>
             }
