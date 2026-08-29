@@ -442,12 +442,15 @@ function buildProfile({ rl, ra, baseProcess, fermentation, ratioTarget, arch, be
     ];
 
   } else if (arch === 'Turbo Shot') {
-    // Minimal preinfusion, immediate high flow, fast high-pressure extraction.
+    // Minimal preinfusion, immediate high flow, fast lower-pressure extraction.
     // Short, bright, high-clarity. Works best with medium+ grind and light/medium roasts.
+    // Pressure is cut well below the archetype baseline (not just a token -0.3 bar) so
+    // Turbo reads as a genuinely lower-pressure, flow-led shot rather than a fast version
+    // of a classic 9-bar profile — see barista-model.md's Turbo Shot guidance.
     const piD    = clamp(Math.round(satD * 0.3 + 1), 2, 5);
     const rampD  = clamp(Math.round(3 + gap('Clarity') * 1), 2, 5);
     const turboD = clamp(Math.round(10 + rl * 1.5), 8, 24);
-    const turboP = clamp(r2(peakP - 0.3), 6.5, 10.5);
+    const turboP = clamp(r2(peakP - 1.5), 5.5, 9.0);
     const turboF = clamp(r2(mainF + 1.8 + clarGap * 0.5), 3.5, 7.0);
     const fillF  = clamp(r1(turboF * 0.8), 2.5, 6.0);
 

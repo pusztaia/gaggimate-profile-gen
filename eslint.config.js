@@ -5,7 +5,9 @@ import reactHooks from 'eslint-plugin-react-hooks';
 
 export default [
   {
-    ignores: ['node_modules/**', 'coverage/**'],
+    // skill/ is a standalone barista-audit toolkit (Node CLI script + docs), not
+    // application code — out of scope for this repo's lint configuration.
+    ignores: ['node_modules/**', 'coverage/**', 'skill/**'],
   },
   js.configs.recommended,
   {
